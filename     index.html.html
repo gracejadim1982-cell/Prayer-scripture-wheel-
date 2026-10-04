@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prayer Scripture Wheel</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#f5efe3,#e9f0e8);color:#28352d;min-height:100vh;display:flex;justify-content:center}
+  .app{width:100%;max-width:520px;padding:22px 16px 35px;text-align:center}
+  h1{margin:4px 0 4px;font-size:28px}
+  .sub{margin:0 0 18px;color:#68756d;font-size:15px}
+  .wheel-wrap{position:relative;width:min(88vw,390px);aspect-ratio:1;margin:0 auto 18px}
+  canvas{width:100%;height:100%;display:block}
+  .pointer{position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:30px solid #7b4b2a;z-index:3}
+  button{border:0;border-radius:999px;padding:15px 42px;font-size:19px;font-weight:bold;background:#7b4b2a;color:white;box-shadow:0 5px 14px #0002;cursor:pointer}
+  button:disabled{opacity:.6}
+  .card{background:white;border-radius:20px;padding:18px 18px 20px;box-shadow:0 5px 20px #00000012;margin-top:18px}
+  .ref{font-weight:bold;font-size:21px;margin-bottom:9px}
+  .verse{font-family:Georgia,serif;font-size:19px;line-height:1.5;font-style:italic}
+  .focus{margin-top:15px;padding-top:13px;border-top:1px solid #e8e4dc;font-size:16px;line-height:1.45}
+  .focus b{display:block;margin-bottom:4px}
+  .hint{font-size:13px;color:#7a857e;margin-top:13px}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🙏 Prayer Scripture Wheel</h1>
+  <p class="sub">Spin the wheel, receive a Scripture, and pray.</p>
+
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="700" height="700"></canvas>
+  </div>
+
+  <button id="spin">SPIN</button>
+
+  <div class="card">
+    <div class="ref" id="ref">Your Scripture will appear here</div>
+    <div class="verse" id="verse">Take a moment to prepare your heart before God.</div>
+    <div class="focus"><b>🙏 Prayer Focus</b><span id="focus">After the wheel stops, pray according to the Scripture.</span></div>
+  </div>
+  <div class="hint">Suggested prayer time: 1–2 minutes after each spin.</div>
+</div>
+
+<script>
+const items = [
+  ["Jeremiah 33:3","Call to me and I will answer you.","Pray for God to speak clearly and reveal His will."],
+  ["Psalm 46:10","Be still, and know that I am God.","Pray for a quiet heart and deeper trust in God."],
+  ["Philippians 4:6–7","Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.","Pray about your worries and surrender them to God."],
+  ["Isaiah 40:31","Those who hope in the Lord will renew their strength.","Pray for renewed strength for yourself and someone who is weary."],
+  ["1 Thessalonians 5:17","Pray without ceasing.","Pray for a life that continually depends on God."],
+  ["Romans 12:12","Be joyful in hope, patient in affliction, faithful in prayer.","Pray for perseverance and hope during difficult seasons."],
+  ["Proverbs 3:5–6","Trust in the Lord with all your heart and lean not on your own understanding.","Surrender a decision or uncertain situation to God."],
+  ["Colossians 4:2","Devote yourselves to prayer, being watchful and thankful.","Pray for a stronger and more faithful prayer life."],
+  ["Ephesians 6:18","Pray in the Spirit on all occasions with all kinds of prayers and requests.","Pray for the needs of others and for spiritual strength."],
+  ["Psalm 121:1–2","My help comes from the Lord, the Maker of heaven and earth.","Pray for someone who needs God's help and protection."],
+  ["Psalm 23:1","The Lord is my shepherd; I lack nothing.","Thank God for His care, provision, and guidance."],
+  ["Matthew 6:9–10","Our Father in heaven, hallowed be your name, your kingdom come, your will be done.","Pray for God's kingdom and His will to be done."],
+  ["James 5:16","Pray for each other so that you may be healed.","Pray for healing, restoration, and encouragement."],
+  ["2 Chronicles 7:14","If my people... will humble themselves and pray... I will hear from heaven.","Pray for the church, leaders, and your nation."],
+  ["Psalm 51:10","Create in me a pure heart, O God, and renew a steadfast spirit within me.","Pray for repentance, renewal, and a clean heart."]
+];
+
+const canvas=document.getElementById("wheel"), ctx=canvas.getContext("2d");
+const N=items.length, colors=["#d9b48f","#a9c5b0","#e5c7c7","#b9c7df","#d8c99a","#b9d1c5"];
+let rotation=0, spinning=false;
+
+function draw(){
+  const cx=350,cy=350,r=330, slice=2*Math.PI/N;
+  ctx.clearRect(0,0,700,700);
+  for(let i=0;i<N;i++){
+    const a=rotation+i*slice-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+slice);ctx.closePath();
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.strokeStyle="#ffffff";ctx.lineWidth=3;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+slice/2);
+    ctx.fillStyle="#334238";ctx.font="bold 18px Arial";ctx.textAlign="right";
+    ctx.fillText(items[i][0],r-18,6);ctx.restore();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,48,0,2*Math.PI);ctx.fillStyle="#fff";ctx.fill();
+  ctx.strokeStyle="#7b4b2a";ctx.lineWidth=6;ctx.stroke();
+  ctx.fillStyle="#7b4b2a";ctx.font="bold 18px Arial";ctx.textAlign="center";ctx.fillText("PRAY",cx,6+cy);
+}
+draw();
+
+document.getElementById("spin").onclick=()=>{
+  if(spinning)return;
+  spinning=true;
+  document.getElementById("spin").disabled=true;
+  const start=rotation, extra=(Math.PI*2)*(5+Math.random()*3)+Math.random()*Math.PI*2;
+  const duration=4200, t0=performance.now();
+  function anim(t){
+    const p=Math.min(1,(t-t0)/duration), ease=1-Math.pow(1-p,4);
+    rotation=start+extra*ease;draw();
+    if(p<1){requestAnimationFrame(anim);return;}
+    rotation%=Math.PI*2;
+    // Pointer is at -90 degrees; determine slice under pointer.
+    let x=(-Math.PI/2-rotation)%(Math.PI*2); if(x<0)x+=Math.PI*2;
+    const idx=Math.floor(x/(Math.PI*2/N))%N;
+    const [ref,verse,focus]=items[idx];
+    document.getElementById("ref").textContent=ref;
+    document.getElementById("verse").textContent="“"+verse+"”";
+    document.getElementById("focus").textContent=focus;
+    spinning=false;document.getElementById("spin").disabled=false;
+  }
+  requestAnimationFrame(anim);
+};
+</script>
+</body>
+</html>
